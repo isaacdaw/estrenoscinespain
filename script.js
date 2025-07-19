@@ -1,3 +1,16 @@
+document.addEventListener("DOMContentLoaded", async function () {
+  const calendarEl = document.getElementById("calendar");
+  const events = await obtenerEventos();
+
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: "dayGridMonth",
+    locale: "es",
+    events: events,
+  });
+
+  calendar.render();
+});
+
 async function obtenerEventos() {
   const events = [];
 
@@ -6,7 +19,7 @@ async function obtenerEventos() {
       const response = await fetch(`/.netlify/functions/tmdb?page=${page}`);
       const data = await response.json();
 
-      if (data.results) {
+      if (data.results && Array.isArray(data.results)) {
         data.results.forEach((movie) => {
           if (movie.release_date) {
             events.push({
@@ -17,10 +30,10 @@ async function obtenerEventos() {
           }
         });
       } else {
-        console.warn("Respuesta sin 'results':", data);
+        console.warn("No se encontraron resultados en la página", page, data);
       }
     } catch (error) {
-      console.error("Error al obtener datos de estrenos:", error);
+      console.error("Error al cargar estrenos:", error);
     }
   }
 
